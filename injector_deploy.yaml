@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: inject
+spec:
+    containers:
+    - name: node-server
+      image: tz70s/node-server
+    - name: injector
+      image: tz70s/kube-injector
+      - containerPort: 12345

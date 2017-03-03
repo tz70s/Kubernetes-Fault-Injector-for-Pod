@@ -120,8 +120,8 @@ func main() {
 	// injector with no query string
 	http.Handle("/injector", http.HandlerFunc(injectPolicy))
 
-	fmt.Println("Start Listen Injector and serve at http://localhost:12345")
-	err := http.ListenAndServe("localhost:12345", nil)
+	fmt.Println("Start Listen Injector and serve at :8282")
+	err := http.ListenAndServe(":8282", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

@@ -85,6 +85,8 @@ func injectPolicy(w http.ResponseWriter, req *http.Request) {
 // select fault injection actions
 
 func injectSelect(w http.ResponseWriter, req *http.Request) {
+
+	count++
 	// check current policy
 	switch FaultInject.policy {
 	case "simpleResponse":
@@ -105,7 +107,6 @@ func injectSelect(w http.ResponseWriter, req *http.Request) {
 	default:
 		injectResponse(w, req)
 	}
-	count++
 }
 
 // Simple response
@@ -153,9 +154,9 @@ func (node *Backend) injectGetRedirect(w http.ResponseWriter, req *http.Request)
 		injectSelect(w, req)
 		return
 	}
+	count++
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, req)
-	count++
 }
 
 func main() {

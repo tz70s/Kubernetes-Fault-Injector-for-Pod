@@ -1,7 +1,10 @@
 # Kubernetes Fault Injection for a single Pod
 
-### Description
-Kubernetes pod have multiple user's containers attach on a system-default "pause" container with sharing network namespace.That is, each containers in a pod can easily use localhost to communicate.
+### Principle
+
+1. Each Kubernetes' pod contains several user's containers attach on a system-default "pause" container with sharing network namespace.That is, *each containers in a pod can easily use localhost to communicate.*
+2. Fault Injector masquerade the response from original responsed web server, and using L7 Reverse Proxy make normal traffic pass.
+3. Async Web Server with handling route and query string to change fault injection policy
 
 ```BASH
 #
@@ -24,16 +27,29 @@ This work reveal simple HTTP fault injection actions before arriving at the endp
 ### Current Functions
 * simpleResponse
 ```BASH
-curl -qa http://inject.default.svc.cluster.local:8282/inject?policy=simpleResponse
+curl -qa http://inject.default.svc.cluster.local:8282/injector?policy=simpleResponse
 ```
-* delayResponse
-Set 3secs response as default
+* timeoutTest/delayResponse
+Set timout, default is 10 secs
 ```BASH
-curl -qa http://inject.default.svc.cluster.local:8282/inject?policy=delayResponse
+curl -qa http://inject.default.svc.cluster.local:8282/injector?timeout=10
 ```
 * statusResponse
 Set status code you like
 ```bash
-curl -qa http://inject.default.svc.cluster.local:8282/inject?status=404
+curl -qa http://inject.default.svc.cluster.local:8282/injector?status=404
+```
+* boundedRetries
+Set bound of retries, default is 10 retries
+```bash
+curl -qa http://inject.default.svc.cluster.local:8282/injector?boundedRetries=10
 ```
 
+### TODO
+* Bind each tested user (specific ip address) with fault injector params
+* Polling Kubernetes API server and autmatically add fault-injector container in user define pod
+```
+1. Retrieve/GET api server in a cluster pod
+2. GET label selected fault-injector pod
+3. Rolling update with fault-injector container deployment
+```

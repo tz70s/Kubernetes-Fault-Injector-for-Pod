@@ -6,6 +6,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/tools/clientcmd"
+	"strconv"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func createNew() *v1.Pod {
 	conSpec.Image = "tz70s/node-server"
 
 	var conPort v1.ContainerPort
-	conPort.ContainerPort = 8080
+	conPort.ContainerPort = 8181
 	conSpec.Ports = []v1.ContainerPort{conPort}
 	podSpec.Containers = []v1.Container{conSpec}
 
@@ -41,6 +42,7 @@ func createNew() *v1.Pod {
 // Update Pod with fault-injector container
 func addinjector(originalPod *v1.Pod) *v1.Pod {
 
+	// Add injector container spec
 	var conSpec v1.Container
 	conSpec.Name = "injector"
 	conSpec.Image = "tz70s/fault-injector"
@@ -48,6 +50,10 @@ func addinjector(originalPod *v1.Pod) *v1.Pod {
 	conPort.ContainerPort = 8282
 	conSpec.Ports = []v1.ContainerPort{conPort}
 
+	// put original container exposed port to reverse proxy
+	conSpec.Command = []string{"/app/injector", strconv.Itoa(int(originalPod.Spec.Containers[0].Ports[0].ContainerPort))}
+
+	// set new pod spec
 	var newPod v1.Pod
 	newPod.TypeMeta.Kind = "Pod"
 	newPod.TypeMeta.APIVersion = "v1"
